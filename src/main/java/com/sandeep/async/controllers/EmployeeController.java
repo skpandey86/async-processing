@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 
 @RestController
@@ -40,16 +41,35 @@ public class EmployeeController {
         } else if (ASYNC_PROCESSING_MODE.equals(mode)) {
 
             try {
-                CompletableFuture<List<Employee>> techEmployeesFuture = employeeService.getTechEmployeesAsync();
-                CompletableFuture<List<Employee>> businessEmployeesFuture = employeeService.getBusinessEmployeesAsync();
-                CompletableFuture.allOf(techEmployeesFuture, businessEmployeesFuture).join();
+
+                /*CompletableFuture<List<Employee>> techEmployeesFuture =
+                        employeeService.getTechEmployeesAsync();
+                CompletableFuture<List<Employee>> businessEmployeesFuture =
+                        employeeService.getBusinessEmployeesAsync();
+                CompletableFuture.allOf(techEmployeesFuture,
+                        businessEmployeesFuture).join();
+
                 employees.addAll(techEmployeesFuture.get());
-                employees.addAll(techEmployeesFuture.get());
+                employees.addAll(businessEmployeesFuture.get());*/
+
+                Future<List<Employee>> techEmployeesFuture =
+                        employeeService.getTechEmployeesAsync();
+                Future<List<Employee>> businessEmployeesFuture =
+                        employeeService.getBusinessEmployeesAsync();
+
+                while (true) {
+                    if (techEmployeesFuture.isDone() && businessEmployeesFuture.isDone() ) {
+                        employees.addAll(techEmployeesFuture.get());
+                        employees.addAll(businessEmployeesFuture.get());
+                        break;
+                    }
+                }
 
             } catch (InterruptedException ex){
                 System.out.println("Exception in calling employee service");
             } catch (ExecutionException ex){
-                System.out.println("Exception getting the employee list from CompletableFuture");
+                System.out.println("Exception getting the employee " +
+                        "list from CompletableFuture");
             }
         } else {
             throw new ResponseStatusException(
@@ -58,4 +78,6 @@ public class EmployeeController {
 
         return employees;
     }
+
+
 }

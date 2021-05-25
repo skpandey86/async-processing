@@ -2,10 +2,13 @@ package com.sandeep.async.services;
 
 import com.sandeep.async.models.Employee;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 
 @Service
 public class EmployeeService {
@@ -32,18 +35,31 @@ public class EmployeeService {
         return businessEmployees;
     }
 
-    @Async
+    /*@Async
     public CompletableFuture<List<Employee>> getTechEmployeesAsync()
             throws InterruptedException {
         Thread.sleep(3000);
         return CompletableFuture.completedFuture(techEmployees);
-    }
+    }*/
 
     @Async
+    public Future<List<Employee>> getTechEmployeesAsync()
+            throws InterruptedException {
+        Thread.sleep(3000);
+        return new AsyncResult<List<Employee>>(techEmployees);
+    }
+
+    /*@Async
     public CompletableFuture<List<Employee>> getBusinessEmployeesAsync()
             throws InterruptedException {
         Thread.sleep(4000);
         return CompletableFuture.completedFuture(businessEmployees);
-    }
+    }*/
 
+    @Async
+    public Future<List<Employee>> getBusinessEmployeesAsync()
+            throws InterruptedException {
+        Thread.sleep(4000);
+        return new AsyncResult<List<Employee>>(businessEmployees);
+    }
 }
